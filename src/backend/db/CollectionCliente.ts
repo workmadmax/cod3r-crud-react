@@ -19,25 +19,26 @@ export default class CollectionCliente implements RepositoryClient {
 
     async save(cliente: Cliente): Promise<Cliente> {
         if (cliente?.id) {
-            await this.#collection().doc(cliente.id).set(cliente)
+            await this.collection().doc(cliente.id).set(cliente)
             return cliente
         } else {
-            const docRef = await this.#collection().add(cliente)
+            const docRef = await this.collection().add(cliente)
             const doc = await docRef.get()
             return doc.data()
         }
     }
 
     async delete(cliente: Cliente): Promise<void> {
-        return this.#collection().doc(cliente.id).delete()
+        return this.collection().doc(cliente.id).delete()
     }
 
     async getAll(): Promise<Cliente[]> {
-        const query = await this.#collection().get()
+        const query = await this.collection().get()
         return query.docs.map(doc => doc.data()) ?? []
     }
-
-    #collection() {
+    
+    private collection() {
         return firebase.firestore().collection('clientes').withConverter(this.#converter)
     }
+    
 }
