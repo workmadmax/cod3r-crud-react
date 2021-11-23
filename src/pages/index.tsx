@@ -1,32 +1,49 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
+import CollectionCliente from "../backend/db/CollectionCliente"
 import Button from "../components/Button"
 import Form from "../components/Form"
 import Layout from "../components/Layout"
 import Table from "../components/Table"
 import Cliente from "../core/Cliente"
+import RepositoryClient from "../core/RepositoryClient"
 
 export default function Home() {
 
-  const clientes = [
-    new Cliente('MADMAX42', 42, '1'),
-    new Cliente('Mr. Feijas', 35, '2'),
-    new Cliente('Boombla', 23, '3'),
-    new Cliente('Gaules', 10, '4')
-  ]
+  const repo: RepositoryClient = new CollectionCliente()
+  
+  const [cliente, setCliente] = useState<Cliente>(Cliente.void())
+  const [clientes, setClientes] = useState<Cliente[]>([])
+  const [visible, setVisible] = useState<'table' | 'form'>('table')
+
+  useEffect(obterTodos, [])
+
+  function obterTodos() {
+    repo.getAll().then(cliente => {
+      setClientes(clientes)
+      setVisible('table')
+    })
+  }
 
   function clienteSelect(cliente: Cliente) {
-    console.log(cliente.name)
+    setCliente(cliente)
+    setVisible('form')
   }
 
-  function clienteDelete(cliente: Cliente) {
-    console.log(`Delete .... ${cliente.name}`)
+  async function clienteDelete(cliente: Cliente) {
+    await repo.delete(cliente)
+    obterTodos()
   }
 
-  function saveClient(cliente: Cliente) {
-    console.log(cliente)
+  function newCliente(cliente: Cliente) {
+    setCliente(Cliente.void())
+    setVisible('form')
+  }
+  
+  async function saveCliente(cliente: Cliente) {
+    await repo.save(cliente)
+    obterTodos()
   }
 
-  const [visible, setVisible] = useState<'table' | 'form'>('table')
 
   return (
     <div className={`
@@ -37,7 +54,7 @@ export default function Home() {
         {visible === 'table' ? (
         <>
         <div className="flex justify-end">
-          <Button className="mb-4" color="green" onClick={() => setVisible('form')}>
+          <Button className="mb-4" color="green" onClick={newCliente}>
             New Client
           </Button>
         </div>
@@ -49,8 +66,8 @@ export default function Home() {
         </>
         ) : (
           <Form 
-            cliente={clientes[0]}
-            clienteChange={saveClient}
+            cliente={cliente}
+            clienteChange={saveCliente}
             cancel={() => setVisible('table')}
           />
         )}

@@ -2,7 +2,7 @@ interface ButtonProps {
     color: 'green'|'blue'|'red'
     className?: string
     children: any
-    onClick?: () => void
+    onClick?: (props) => void
 }
 
 export default function Button(props: ButtonProps) {
